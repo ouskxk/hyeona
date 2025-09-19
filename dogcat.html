@@ -3,514 +3,335 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>반려동물 건강 관리 플래너</title>
+    <title>멍냥멍냥 | 웹 애플리케이션</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6; /* Light gray background */
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8fafc; /* bg-slate-50 */
         }
-        .page {
-            display: none;
+        .card {
+            background-color: white;
+            border-radius: 1rem; /* rounded-2xl */
+            padding: 1.5rem; /* p-6 */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: all 0.3s ease-in-out;
         }
-        .page.active {
-            display: block;
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
-        .hidden {
-            display: none;
+        .btn-primary {
+            background-color: #22c55e; /* bg-green-500 */
+            color: white;
+            font-weight: 700; /* font-bold */
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: background-color 0.2s;
         }
-        /* Custom scrollbar for better aesthetics */
-        ::-webkit-scrollbar {
-            width: 6px;
+        .btn-primary:hover {
+            background-color: #16a34a; /* bg-green-600 */
         }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+        .btn-secondary {
+            background-color: #1f2937; /* bg-gray-800 */
+            color: white;
+            font-weight: 700; /* font-bold */
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: background-color 0.2s;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 3px;
+        .btn-secondary:hover {
+            background-color: #111827; /* bg-gray-900 */
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 500px;
+            width: 90%;
+        }
+        .nav-link.active {
+            color: #16a34a; /* text-green-600 */
         }
     </style>
 </head>
-<body class="bg-gray-100">
-
-    <div id="app-container" class="max-w-md mx-auto bg-white min-h-screen shadow-lg">
-        <!-- Header -->
-        <header class="sticky top-0 bg-white z-10 p-4 border-b flex justify-between items-center">
-            <h1 class="text-xl font-bold text-gray-800" id="header-title">하이, 몽이 보호자님!</h1>
-            <div class="flex items-center space-x-2">
-                <i data-lucide="bell" class="cursor-pointer"></i>
-                <i data-lucide="user-circle-2" class="cursor-pointer" data-page="profile-page"></i>
+<body>
+    <div id="app-container" class="max-w-7xl mx-auto p-8">
+        <!-- 1. 헤더: 로고, 메뉴, 검색, 인증 -->
+        <header class="flex justify-between items-center mb-10">
+            <div class="flex items-center gap-3">
+                <a href="#" data-page="dashboard" class="flex items-center gap-3">
+                    <svg class="w-10 h-10 text-slate-800" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M100,135 C80,150 50,145 40,120 C30,95 45,70 70,65 C95,60 105,75 100,95"/><path d="M100,135 C120,150 150,145 160,120 C170,95 155,70 130,65 C105,60 95,75 100,95"/><circle cx="55" cy="55" r="18"/><circle cx="90" cy="40" r="18"/><circle cx="110" cy="40" r="18"/><circle cx="145" cy="55" r="18"/></svg>
+                    <h1 class="text-2xl font-bold text-slate-800">멍냥멍냥</h1>
+                </a>
+            </div>
+            <div class="flex items-center gap-8">
+                <nav id="main-nav" class="hidden md:flex items-center gap-6 text-md font-semibold text-slate-600">
+                    <a href="#" class="nav-link hover:text-green-600" data-page="diet">식단</a>
+                    <a href="#" class="nav-link hover:text-green-600" data-page="activity">활동</a>
+                    <a href="#" class="nav-link hover:text-green-600" data-page="health">건강</a>
+                    <a href="#" class="nav-link hover:text-green-600" data-page="calendar">캘린더</a>
+                    <a href="#" class="nav-link hover:text-green-600" data-page="community">커뮤니티</a>
+                </nav>
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <input type="text" id="search-input" placeholder="검색..." class="w-48 pl-10 pr-4 py-2 border rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-300">
+                        <svg class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
+                    </div>
+                    <div id="logged-out-view" class="flex items-center gap-2">
+                        <button id="login-button" class="px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-100 rounded-lg">로그인</button>
+                        <button id="signup-button" class="btn-primary px-4 py-2 text-sm">회원가입</button>
+                    </div>
+                    <div id="logged-in-view" class="hidden relative">
+                        <button id="profile-button" class="flex items-center gap-2">
+                            <img src="https://placehold.co/32x32/a7f3d0/14532d?text=코" alt="User Avatar" class="w-8 h-8 rounded-full">
+                            <span class="font-bold text-sm">코쪽이맘</span>
+                        </button>
+                        <div id="dropdown-menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 py-1 z-10">
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-page="profile">프로필 보기</a>
+                            <a href="#" id="logout-button" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">로그아웃</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </header>
 
-        <!-- Main Content -->
-        <main class="p-4 pb-20">
-            <!-- 0. 메인 대시보드 -->
-            <div id="main-dashboard" class="page active">
-                <p class="text-gray-500 mb-6">오늘도 건강한 하루 보내세요!</p>
-                
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div class="bg-gray-50 p-4 rounded-xl shadow">
-                        <h3 class="font-semibold mb-2 text-gray-700">오늘의 식단 기록</h3>
-                        <div class="relative w-24 h-24 mx-auto my-2">
-                            <svg class="w-full h-full" viewBox="0 0 36 36">
-                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e6e6e6" stroke-width="3"></path>
-                                <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831" fill="none" stroke="#4f46e5" stroke-width="3" stroke-dasharray="70, 100" stroke-linecap="round"></path>
-                            </svg>
-                            <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                <span class="text-xl font-bold">418</span>
-                                <span class="text-xs text-gray-500">/ 600 Kcal</span>
-                            </div>
-                        </div>
-                        <button class="w-full text-sm text-indigo-600 font-semibold" data-page="diet-log-page">식사 추가</button>
-                    </div>
-                    <div class="bg-gray-50 p-4 rounded-xl shadow">
-                        <h3 class="font-semibold mb-2 text-gray-700">스마트 활동량</h3>
-                        <div class="text-center my-4">
-                            <p class="text-3xl font-bold">30<span class="text-lg text-gray-500">분</span></p>
-                            <p class="text-gray-500 text-sm">/ 목표 45분</p>
-                        </div>
-                        <p class="text-xs text-center text-red-500 mb-2">활동량이 적은편이에요.</p>
-                        <button class="w-full text-sm text-indigo-600 font-semibold" data-page="walk-tracker-page">산책 시작</button>
-                    </div>
-                </div>
-
-                <div class="bg-gray-50 p-4 rounded-xl shadow">
-                    <h3 class="font-semibold mb-2 text-gray-700">캘린더</h3>
-                    <div class="text-center mb-4">
-                        <p class="text-lg font-semibold">2025년 9월</p>
-                    </div>
-                    <div class="grid grid-cols-7 text-center text-xs text-gray-500">
-                        <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
-                    </div>
-                    <div class="grid grid-cols-7 text-center text-sm mt-2">
-                        <!-- Calendar days will be generated by JS -->
-                        <div></div><div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div>
-                        <div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div><div>13</div>
-                        <div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div class="bg-red-500 text-white rounded-full w-6 h-6 mx-auto flex items-center justify-center">19</div><div>20</div>
-                        <div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div>
-                        <div>28</div><div>29</div><div>30</div>
-                    </div>
-                    <div class="mt-4 pt-4 border-t">
-                        <p class="text-sm font-semibold">9월 19일: 예방접종 안내</p>
-                        <p class="text-xs text-gray-500">잊지말고 병원에 방문해주세요!</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 1. 반려동물 등록/관리 페이지 -->
-            <div id="profile-page" class="page">
-                <h2 class="text-2xl font-bold mb-4">나의 반려동물</h2>
-                <div id="pet-list-container" class="space-y-4 mb-6">
-                    <!-- Pet list will be generated by JS -->
-                    <div class="flex items-center justify-between bg-gray-50 p-3 rounded-lg shadow-sm">
-                        <div class="flex items-center">
-                            <img src="https://placehold.co/48x48/E2E8F0/333?text=몽이" class="w-12 h-12 rounded-full mr-4">
-                            <div>
-                                <p class="font-semibold">몽이</p>
-                                <p class="text-sm text-gray-500">말티즈, 5살</p>
-                            </div>
-                        </div>
-                        <div>
-                            <button class="text-sm text-gray-500">수정</button>
-                        </div>
-                    </div>
-                </div>
-                <button class="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold" data-page="pet-registration-page">새로운 반려동물 추가</button>
-            </div>
-            
-            <div id="pet-registration-page" class="page">
-                <h2 class="text-2xl font-bold mb-4">반려동물 정보 등록</h2>
-                <form id="add-pet-form" class="space-y-4">
-                    <div class="flex justify-center">
-                        <img id="pet-photo-preview" src="https://placehold.co/96x96/E2E8F0/333?text=사진등록" class="w-24 h-24 rounded-full cursor-pointer">
-                        <input type="file" id="pet-photo-input" class="hidden" accept="image/*">
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium">이름</label>
-                        <input type="text" placeholder="반려동물의 이름을 입력하세요" class="w-full p-2 border rounded-md mt-1">
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium">종류</label>
-                        <div class="flex gap-4 mt-1">
-                           <button type="button" class="pet-type-btn flex-1 p-2 border rounded-md bg-indigo-500 text-white">강아지</button>
-                           <button type="button" class="pet-type-btn flex-1 p-2 border rounded-md">고양이</button>
-                        </div>
-                    </div>
-                     <div>
-                        <label class="text-sm font-medium">품종</label>
-                        <input type="text" placeholder="예: 말티즈, 코리안숏헤어" class="w-full p-2 border rounded-md mt-1">
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium">생년월일</label>
-                        <input type="date" class="w-full p-2 border rounded-md mt-1">
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium">체중 (kg)</label>
-                        <input type="number" step="0.1" placeholder="예: 5.2" class="w-full p-2 border rounded-md mt-1">
-                    </div>
-                    <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold">저장하기</button>
-                </form>
-            </div>
-
-
-            <!-- 2. AI 맞춤 식단 플래너 -->
-            <div id="diet-log-page" class="page">
-                <h2 class="text-2xl font-bold mb-4">식사 기록하기</h2>
-                 <div class="mb-4">
-                    <button class="w-full bg-teal-500 text-white py-3 rounded-lg font-semibold mb-4" data-page="ingredient-analysis-page">
-                        <i data-lucide="scan-line" class="inline-block mr-2"></i> 사료 성분 분석 (AI)
-                    </button>
-                 </div>
-                <div class="space-y-4">
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <h3 class="font-semibold">아침</h3>
-                        <p class="text-sm text-gray-600">- 로얄캐닌 인도어 (30g)</p>
-                        <button class="text-sm text-indigo-600 mt-2">+ 아침 식사/간식 추가</button>
-                    </div>
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <h3 class="font-semibold">점심</h3>
-                        <button class="text-sm text-indigo-600 mt-2">+ 점심 식사/간식 추가</button>
-                    </div>
-                     <div class="bg-gray-50 p-4 rounded-lg">
-                        <h3 class="font-semibold">저녁</h3>
-                        <button class="text-sm text-indigo-600 mt-2">+ 저녁 식사/간식 추가</button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="ingredient-analysis-page" class="page">
-                 <h2 class="text-2xl font-bold mb-4">사료 성분 분석 (AI)</h2>
-                 <p class="text-gray-600 mb-4">가이드에 맞춰 사료 성분표를 촬영하거나 앨범에서 사진을 불러와 주세요.</p>
-                 <div class="border-2 border-dashed rounded-lg p-8 text-center bg-gray-50 mb-4">
-                     <i data-lucide="image" class="mx-auto h-12 w-12 text-gray-400"></i>
-                     <p class="mt-2 text-sm text-gray-500">사료 성분표 사진 예시</p>
-                 </div>
-                 <div class="flex gap-4">
-                     <button class="flex-1 bg-gray-200 py-3 rounded-lg font-semibold"><i data-lucide="camera" class="inline-block mr-1 h-4 w-4"></i> 촬영하기</button>
-                     <button class="flex-1 bg-gray-200 py-3 rounded-lg font-semibold"><i data-lucide="gallery-horizontal" class="inline-block mr-1 h-4 w-4"></i> 앨범</button>
-                 </div>
-                 <button id="analyze-btn" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold mt-6" data-page="analysis-result-page">분석하기 (시뮬레이션)</button>
-            </div>
-
-            <div id="analysis-result-page" class="page">
-                <h2 class="text-2xl font-bold mb-2">AI 분석 결과</h2>
-                <p class="text-gray-500 mb-4">'오리젠 피트앤트림' 영양 성분 분석 결과입니다.</p>
-                <div class="bg-gray-50 p-4 rounded-lg space-y-3">
-                    <h3 class="font-semibold border-b pb-2">현재 영양 상태</h3>
-                    <p><strong>탄수화물:</strong> <span class="text-green-600">적정</span></p>
-                    <p><strong>단백질:</strong> <span class="text-red-500">5% 부족</span></p>
-                    <p><strong>지방:</strong> <span class="text-green-600">양호</span></p>
-                    <p><strong>칼슘:</strong> <span class="text-red-500">2% 부족</span></p>
-                </div>
-                <div class="bg-indigo-50 p-4 rounded-lg space-y-3 mt-4">
-                     <h3 class="font-semibold border-b pb-2 text-indigo-800">AI 추천</h3>
-                     <p>단백질 보충을 위해 소고기 간식을 급여해보세요.</p>
-                     <p>추천 영양제: <a href="#" class="text-indigo-600 font-semibold underline">오메가3 영양제 보기</a></p>
-                </div>
-            </div>
-
-            <!-- 3. 산책 및 활동량 분석 -->
-            <div id="walk-tracker-page" class="page">
-                <h2 class="text-2xl font-bold mb-4">산책 기록</h2>
-                <div class="relative rounded-lg overflow-hidden h-64 mb-4">
-                    <img src="https://placehold.co/600x400/e2e8f0/333?text=실시간+지도+화면" class="w-full h-full object-cover">
-                </div>
-                <div class="grid grid-cols-2 gap-4 text-center mb-6">
-                    <div>
-                        <p class="text-gray-500">시간</p>
-                        <p class="text-2xl font-bold">00:15:32</p>
-                    </div>
-                    <div>
-                        <p class="text-gray-500">거리</p>
-                        <p class="text-2xl font-bold">1.2 km</p>
-                    </div>
-                </div>
-                <div class="flex gap-4">
-                    <button class="flex-1 bg-yellow-500 text-white py-3 rounded-lg font-semibold">일시정지</button>
-                    <button class="flex-1 bg-red-500 text-white py-3 rounded-lg font-semibold">종료</button>
-                </div>
-                 <button class="w-full text-center mt-4 text-indigo-600 font-semibold" data-page="walk-history-page">지난 산책 기록 보기</button>
-            </div>
-            
-            <div id="walk-history-page" class="page">
-                <h2 class="text-2xl font-bold mb-4">산책 기록 및 통계</h2>
-                <!-- Tabs -->
-                <div class="flex border-b mb-4">
-                    <button class="flex-1 py-2 text-indigo-600 border-b-2 border-indigo-600">기록 목록</button>
-                    <button class="flex-1 py-2 text-gray-500">통계</button>
-                </div>
-                <!-- Record List -->
-                <div class="space-y-3">
-                    <div class="bg-gray-50 p-3 rounded-lg">
-                        <p class="font-semibold">2025년 9월 18일</p>
-                        <p class="text-sm text-gray-500">35분 / 2.1km</p>
-                    </div>
-                     <div class="bg-gray-50 p-3 rounded-lg">
-                        <p class="font-semibold">2025년 9월 17일</p>
-                        <p class="text-sm text-gray-500">40분 / 2.5km</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 4. 건강 이상 징후 체크 -->
-            <div id="symptom-checker-page" class="page">
-                <h2 class="text-2xl font-bold mb-2">건강 이상 징후 체크</h2>
-                <p class="text-gray-500 mb-6">가장 가까운 증상을 선택해주세요.</p>
-                <div class="grid grid-cols-3 gap-4 text-center">
-                    <div class="bg-gray-50 p-4 rounded-lg cursor-pointer" data-page="symptom-checklist-page">
-                        <i data-lucide="stomach" class="mx-auto h-8 w-8 text-indigo-600"></i>
-                        <p class="text-sm mt-2 font-semibold">소화기</p>
-                    </div>
-                    <div class="bg-gray-50 p-4 rounded-lg" data-page="symptom-checklist-page">
-                        <i data-lucide="spray-can" class="mx-auto h-8 w-8 text-indigo-600"></i>
-                        <p class="text-sm mt-2 font-semibold">피부</p>
-                    </div>
-                    <div class="bg-gray-50 p-4 rounded-lg" data-page="symptom-checklist-page">
-                        <i data-lucide="puzzle" class="mx-auto h-8 w-8 text-indigo-600"></i>
-                        <p class="text-sm mt-2 font-semibold">행동/기력</p>
-                    </div>
-                    <div class="bg-gray-50 p-4 rounded-lg" data-page="symptom-checklist-page">
-                        <i data-lucide="wind" class="mx-auto h-8 w-8 text-indigo-600"></i>
-                        <p class="text-sm mt-2 font-semibold">호흡기</p>
-                    </div>
-                    <div class="bg-gray-50 p-4 rounded-lg" data-page="symptom-checklist-page">
-                        <i data-lucide="eye" class="mx-auto h-8 w-8 text-indigo-600"></i>
-                        <p class="text-sm mt-2 font-semibold">눈</p>
-                    </div>
-                     <div class="bg-gray-50 p-4 rounded-lg" data-page="symptom-checklist-page">
-                        <i data-lucide="more-horizontal" class="mx-auto h-8 w-8 text-indigo-600"></i>
-                        <p class="text-sm mt-2 font-semibold">기타</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div id="symptom-checklist-page" class="page">
-                 <h2 class="text-2xl font-bold mb-4">상세 증상 체크 (소화기)</h2>
-                 <form class="space-y-6">
-                     <div>
-                         <p class="font-semibold">언제부터 구토를 했나요?</p>
-                         <div class="flex flex-col space-y-2 mt-2">
-                            <label class="p-3 border rounded-md"><input type="radio" name="q1" class="mr-2">오늘부터</label>
-                            <label class="p-3 border rounded-md"><input type="radio" name="q1" class="mr-2">2~3일 전</label>
-                            <label class="p-3 border rounded-md"><input type="radio" name="q1" class="mr-2">일주일 이상</label>
-                         </div>
-                     </div>
-                     <div>
-                         <p class="font-semibold">하루에 몇 번 구토를 했나요?</p>
-                         <div class="flex flex-col space-y-2 mt-2">
-                             <label class="p-3 border rounded-md"><input type="radio" name="q2" class="mr-2">1~2회</label>
-                             <label class="p-3 border rounded-md"><input type="radio" name="q2" class="mr-2">3~5회</label>
-                             <label class="p-3 border rounded-md"><input type="radio" name="q2" class="mr-2">6회 이상</label>
-                         </div>
-                     </div>
-                     <button type="button" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold" data-page="symptom-result-page">결과 보기 (시뮬레이션)</button>
-                 </form>
-            </div>
-            
-            <div id="symptom-result-page" class="page">
-                <h2 class="text-2xl font-bold mb-4">AI 건강 분석 리포트</h2>
-                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
-                    <p class="text-sm text-yellow-700">본 결과는 참고용이며, 정확한 진단은 반드시 수의사와 상담하세요.</p>
-                </div>
-                 <div class="bg-gray-50 p-4 rounded-lg space-y-3">
-                    <h3 class="font-semibold border-b pb-2">의심 건강 문제</h3>
-                    <p>- 급성 위염 또는 식이 알레르기</p>
-                </div>
-                <div class="bg-indigo-50 p-4 rounded-lg space-y-3 mt-4">
-                     <h3 class="font-semibold border-b pb-2 text-indigo-800">대처 방법</h3>
-                     <p>- 최소 12시간 동안 금식시켜주세요.</p>
-                     <p>- 소화가 잘되는 부드러운 음식을 소량 급여해보세요.</p>
-                </div>
-                <button class="w-full bg-teal-500 text-white py-3 rounded-lg font-semibold mt-6">가까운 동물병원 찾기</button>
-            </div>
-
-            <!-- 5. 커뮤니티 -->
-            <div id="community-page" class="page">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold">커뮤니티</h2>
-                    <button class="bg-indigo-600 text-white px-3 py-1 rounded-full text-sm font-semibold" data-page="community-create-post-page">글쓰기</button>
-                </div>
-                <div class="flex border-b mb-4">
-                    <button class="flex-1 py-2 text-indigo-600 border-b-2 border-indigo-600">자유글</button>
-                    <button class="flex-1 py-2 text-gray-500">정보공유</button>
-                    <button class="flex-1 py-2 text-gray-500">산책친구</button>
-                </div>
-                <div class="space-y-4">
-                    <div class="p-4 bg-gray-50 rounded-lg" data-page="community-post-page">
-                        <p class="font-semibold">강아지 유치원 추천해주세요!</p>
-                        <div class="flex justify-between text-xs text-gray-500 mt-2">
-                            <span>멍멍조아 · 2분 전</span>
-                            <span><i data-lucide="heart" class="inline h-3 w-3"></i> 12  <i data-lucide="message-square" class="inline h-3 w-3 ml-2"></i> 5</span>
-                        </div>
-                    </div>
-                    <div class="p-4 bg-gray-50 rounded-lg" data-page="community-post-page">
-                        <p class="font-semibold">새로 나온 간식 후기</p>
-                        <div class="flex justify-between text-xs text-gray-500 mt-2">
-                            <span>간식대장 · 10분 전</span>
-                             <span><i data-lucide="heart" class="inline h-3 w-3"></i> 34  <i data-lucide="message-square" class="inline h-3 w-3 ml-2"></i> 12</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="community-post-page" class="page">
-                <div class="mb-4">
-                    <h2 class="text-xl font-bold">강아지 유치원 추천해주세요!</h2>
-                    <div class="flex items-center text-sm text-gray-500 mt-2">
-                        <span>멍멍조아</span>
-                        <span class="mx-2">·</span>
-                        <span>5분 전</span>
-                    </div>
-                </div>
-                <div class="text-gray-700 leading-relaxed border-y py-4 my-4">
-                    <p>안녕하세요! 6개월 된 비숑 키우고 있는데, 에너지가 너무 넘쳐서 유치원을 보내볼까 해요. 혹시 다녀보신 곳 중에 괜찮았던 곳 있으면 추천 부탁드려요!</p>
-                    <img src="https://placehold.co/400x300/e2e8f0/333?text=사진" class="mt-4 rounded-lg w-full">
-                </div>
-                <div class="flex items-center space-x-4 text-gray-600">
-                    <span><i data-lucide="heart" class="inline h-4 w-4"></i> 좋아요 15</span>
-                    <span><i data-lucide="message-square" class="inline h-4 w-4"></i> 댓글 2</span>
-                </div>
-                <div class="mt-6 space-y-4">
-                     <div class="text-sm">
-                        <p class="font-semibold">냥냥펀치</p>
-                        <p class="text-gray-600">저희 애는 '해피댕댕' 유치원 다니는데 만족해요! 선생님들이 케어를 잘해주시는 것 같아요.</p>
-                     </div>
-                      <div class="text-sm">
-                        <p class="font-semibold">댕댕월드</p>
-                        <p class="text-gray-600">ㅇㅇ유치원 시설이 정말 좋더라고요. 상담 한번 받아보세요~</p>
-                     </div>
-                </div>
-                <div class="mt-6 flex">
-                    <input type="text" placeholder="댓글을 입력하세요..." class="flex-1 p-2 border rounded-l-lg">
-                    <button class="bg-indigo-600 text-white px-4 rounded-r-lg">전송</button>
-                </div>
-            </div>
-            
-             <div id="community-create-post-page" class="page">
-                <h2 class="text-2xl font-bold mb-4">새 글 작성하기</h2>
-                <form class="space-y-4">
-                    <input type="text" placeholder="제목을 입력하세요" class="w-full p-2 border rounded-md">
-                    <textarea rows="10" placeholder="내용을 입력하세요..." class="w-full p-2 border rounded-md"></textarea>
-                    <button type="button" class="w-full border-2 border-dashed py-4 rounded-lg text-gray-500"><i data-lucide="image-plus" class="inline-block mr-2"></i> 사진 추가하기</button>
-                    <button type="submit" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold">등록하기</button>
-                </form>
-            </div>
-
-        </main>
-
-        <!-- Bottom Navigation -->
-        <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 max-w-md w-full bg-white border-t grid grid-cols-5 text-center text-gray-500">
-            <a href="#" class="nav-item p-3" data-page="main-dashboard">
-                <i data-lucide="home" class="mx-auto"></i><span class="text-xs">홈</span>
-            </a>
-            <a href="#" class="nav-item p-3" data-page="diet-log-page">
-                <i data-lucide="utensils-crossed" class="mx-auto"></i><span class="text-xs">식단</span>
-            </a>
-            <a href="#" class="nav-item p-3" data-page="walk-tracker-page">
-                <i data-lucide="footprints" class="mx-auto"></i><span class="text-xs">활동</span>
-            </a>
-            <a href="#" class="nav-item p-3" data-page="symptom-checker-page">
-                <i data-lucide="stethoscope" class="mx-auto"></i><span class="text-xs">건강</span>
-            </a>
-            <a href="#" class="nav-item p-3" data-page="community-page">
-                <i data-lucide="users" class="mx-auto"></i><span class="text-xs">커뮤니티</span>
-            </a>
-        </nav>
+        <!-- 2. 본문: 동적으로 변경될 영역 -->
+        <main id="main-content"></main>
     </div>
 
+    <!-- 3. 팝업(모달)을 위한 컨테이너 -->
+    <div id="modal-container"></div>
+
     <script>
+        const mainContent = document.getElementById('main-content');
+        const modalContainer = document.getElementById('modal-container');
+        const appContainer = document.getElementById('app-container');
+        
+        // --- Application State ---
+        let isAppleCalendarSynced = false;
+
+        // --- Templates ---
+        const templates = {
+            dashboard: () => {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = today.getMonth() + 1;
+                const date = today.getDate();
+                const day = today.getDay();
+                const week = ['일', '월', '화', '수', '목', '금', '토'];
+                const dayName = week[day];
+                const formattedDate = `${year}년 ${month}월 ${date}일 ${dayName}요일`;
+
+                return `
+                    <div class="mb-8"><h2 class="text-3xl font-bold text-slate-800">오늘의 대시보드</h2><p class="text-slate-500 mt-1">${formattedDate}</p></div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div class="lg:col-span-2 space-y-8">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div class="card"><h3 class="font-bold text-lg mb-4 text-slate-700">오늘의 식단 기록</h3><div class="flex items-center gap-4"><div class="flex-1 space-y-2"><div class="w-full bg-gray-200 rounded-full h-2.5"><div class="bg-green-500 h-2.5 rounded-full" style="width: 83%"></div></div><p class="text-lg font-bold">500 <span class="text-sm font-normal text-slate-500">/ 600 Kcal</span></p></div><button class="btn-primary flex-shrink-0" data-modal="addMeal">식사 추가</button></div><p class="text-xs text-slate-500 mt-3">아침: 사료 1컵 | 저녁: 닭가슴살 50g</p></div>
+                                <div class="card"><h3 class="font-bold text-lg mb-4 text-slate-700">스마트 활동량</h3><div class="flex items-center gap-4"><div class="flex-1"><p class="text-lg font-bold">30 <span class="text-sm font-normal text-slate-500">분 / 목표 45분</span></p><p class="text-sm font-semibold text-red-500">활동량이 적은편이에요.</p></div><button class="btn-primary flex-shrink-0" data-page="activity">산책 시작</button></div><p class="text-xs text-slate-500 mt-3">산책 1회 / 20분 | 실내놀이 1회 / 10분</p></div>
+                            </div>
+                            <div class="card"><h3 class="font-bold text-lg mb-4 text-slate-700">${year}년 ${month}월 캘린더</h3><div class="h-80 bg-slate-50 rounded-lg flex items-center justify-center text-slate-400 font-semibold border">Full Calendar UI Component</div></div>
+                        </div>
+                        <div class="lg:col-span-1 space-y-8">
+                            <div class="card"><h3 class="font-bold text-lg mb-2 text-slate-700">건강 이상 징후 체크</h3><p class="text-sm text-slate-500 mb-4">반려동물의 상태를 체크해보세요.</p><div class="space-y-2 text-sm"><button class="w-full text-left p-2 rounded-lg hover:bg-slate-100">구토 / 설사</button><button class="w-full text-left p-2 rounded-lg hover:bg-slate-100">기력 저하 / 식욕 부진</button></div><button class="btn-secondary w-full mt-4" data-page="health">자세히 체크하기</button></div>
+                            <div class="card"><h3 class="font-bold text-lg mb-4 text-slate-700">커뮤니티 최신 글</h3><div class="space-y-3"><a href="#" class="block p-2 rounded-lg hover:bg-slate-100"><p class="font-semibold text-sm truncate">강아지 수제 간식 레시피 공유해요!</p><p class="text-xs text-slate-500">작성자: 댕댕집사</p></a><a href="#" class="block p-2 rounded-lg hover:bg-slate-100"><p class="font-semibold text-sm truncate">고양이 화장실 모래 추천받아요 ㅠㅠ</p><p class="text-xs text-slate-500">작성자: 냥냥펀치</p></a></div><a href="#" class="text-sm font-bold text-green-600 hover:underline mt-4 block text-center" data-page="community">더 보기</a></div>
+                        </div>
+                    </div>
+                `;
+            },
+            diet: `<!-- ... (previous detailed template) ... -->`,
+            activity: `<!-- ... (previous detailed template) ... -->`,
+            health: `<!-- ... (previous detailed template) ... -->`,
+            calendar: () => {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = today.getMonth() + 1;
+                const syncButtonText = isAppleCalendarSynced ? '연동 해제' : 'Apple 캘린더 연동';
+                const syncButtonClass = isAppleCalendarSynced ? 'bg-slate-200' : '';
+
+                return `
+                    <div class="mb-8 flex justify-between items-center">
+                        <h2 class="text-3xl font-bold">${year}년 ${month}월 캘린더</h2>
+                        <div class="flex items-center gap-4">
+                            <button id="apple-cal-sync-btn" class="flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-100 rounded-lg border ${syncButtonClass}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 16 16"><path d="M8.28,3.284a1.88,1.88,0,0,0-1.336.56,1.883,1.883,0,0,0-.56,1.336,1.93,1.93,0,0,0,.048.4,1,1,0,0,0,.152.384A1.2,1.2,0,0,0,7.3,6.2a.545.545,0,0,0,.368.128.528.528,0,0,0,.368-.128,1.2,1.2,0,0,0,.712-.232,1,1,0,0,0,.152-.384,1.93,1.93,0,0,0,.048-.4,1.883,1.883,0,0,0-.56-1.336A1.88,1.88,0,0,0,8.28,3.284Zm2.08,8.2a1.866,1.866,0,0,1-1.2.4,2.049,2.049,0,0,1-1.44-.64,1,1,0,0,0-1.44,0,2.042,2.042,0,0,1-1.44.64,1.866,1.866,0,0,1-1.2-.4C2.336,10.2,2.056,6.312,3.672,4.6A4.322,4.322,0,0,1,7.2,3.1a4.44,4.44,0,0,1,2.16,0,4.322,4.322,0,0,1,3.528,1.5C14.536,6.312,14.256,10.2,12.728,11.484Z"/></svg>
+                                ${syncButtonText}
+                            </button>
+                            <button class="btn-primary" data-modal="addEvent">일정 추가</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="h-[600px] bg-slate-50 rounded-lg flex flex-col items-center justify-center text-slate-400 font-semibold border">
+                             <p>Full Calendar UI Component</p>
+                            ${isAppleCalendarSynced ? '<p class="text-sm mt-2 text-green-600">Apple 캘린더와 연동되었습니다.</p>' : ''}
+                        </div>
+                    </div>
+                `;
+            },
+            community: `<!-- ... (previous detailed template) ... -->`,
+            profile: `<!-- ... (previous detailed template) ... -->`,
+            searchResults: (query) => `<!-- ... (previous detailed template) ... -->`,
+            
+            signup: `<!-- ... (previous detailed template) ... -->`,
+            addMeal: `<!-- ... (previous detailed template) ... -->`,
+            addEvent: () => {
+                const syncCheckboxDisabled = !isAppleCalendarSynced;
+                return `
+                    <div class="modal-overlay" data-modal-close>
+                        <div class="modal-content">
+                            <h2 class="text-2xl font-bold mb-4">새 일정 추가</h2>
+                            <form class="space-y-4">
+                                <input type="date" class="w-full p-2 border rounded">
+                                <input type="text" placeholder="일정 제목 (예: 예방접종)" class="w-full p-2 border rounded">
+                                <textarea placeholder="메모" class="w-full p-2 border rounded h-24"></textarea>
+                                <label class="flex items-center gap-2 text-sm ${syncCheckboxDisabled ? 'text-gray-400 cursor-not-allowed' : ''}">
+                                    <input type="checkbox" class="form-checkbox" ${syncCheckboxDisabled ? 'disabled' : ''}>
+                                    <span>Apple 캘린더에도 추가</span>
+                                </label>
+                                <button type="submit" class="btn-primary w-full py-2">저장하기</button>
+                            </form>
+                        </div>
+                    </div>
+                `;
+            },
+        };
+
+        // --- Core Functions ---
+        function renderPage(pageName, params) {
+            // Restore templates that were omitted for brevity
+            templates.diet = templates.diet.startsWith('<!--') ? `
+                <div class="mb-8"><h2 class="text-3xl font-bold">AI 식단 플래너</h2><p class="text-slate-500 mt-1">AI를 통해 맞춤 식단과 영양 정보를 확인하세요.</p></div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="card space-y-4"><h3 class="font-bold text-lg">1. 반려동물 정보 입력</h3><select class="w-full p-2 border rounded"><option>코코 (강아지)</option></select><input type="text" placeholder="현재 먹이는 사료/음식" class="w-full p-2 border rounded"><textarea placeholder="특별히 관리하고 싶은 건강 문제 (예: 피부, 관절)" class="w-full p-2 border rounded h-24"></textarea><button class="btn-primary w-full py-2">분석 받기</button></div>
+                    <div class="card"><h3 class="font-bold text-lg">2. AI 분석 결과</h3><div class="space-y-4 mt-4 p-4 bg-slate-50 rounded-lg"><div class="font-semibold">결과가 여기에 표시됩니다.</div></div></div>
+                </div>` : templates.diet;
+            templates.activity = templates.activity.startsWith('<!--') ? `
+                <div class="mb-8"><h2 class="text-3xl font-bold">활동 기록</h2><p class="text-slate-500 mt-1">오늘의 산책 경로와 주간 활동량을 확인하세요.</p></div>
+                <div class="card mb-8"><div class="h-96 bg-slate-200 rounded-lg flex items-center justify-center text-slate-500">Map UI Component</div></div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                    <div class="card"><p class="text-slate-500">오늘 산책 시간</p><p class="text-3xl font-bold">30분</p></div>
+                    <div class="card"><p class="text-slate-500">오늘 이동 거리</p><p class="text-3xl font-bold">1.2 km</p></div>
+                    <div class="card"><p class="text-slate-500">주간 평균</p><p class="text-3xl font-bold">25분</p></div>
+                </div>` : templates.activity;
+            templates.health = templates.health.startsWith('<!--') ? `
+                <div class="mb-8 text-center"><h2 class="text-3xl font-bold">건강 이상 징후 체크</h2><p class="text-slate-500 mt-1">해당되는 증상을 모두 선택하면, AI가 의심되는 문제를 알려드립니다.</p></div>
+                <div class="card max-w-4xl mx-auto"><div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <label class="flex items-center gap-2 p-3 border rounded-lg hover:bg-slate-100 cursor-pointer"><input type="checkbox" class="h-4 w-4"> 구토</label>
+                    <label class="flex items-center gap-2 p-3 border rounded-lg hover:bg-slate-100 cursor-pointer"><input type="checkbox" class="h-4 w-4"> 설사</label>
+                    <label class="flex items-center gap-2 p-3 border rounded-lg hover:bg-slate-100 cursor-pointer"><input type="checkbox" class="h-4 w-4"> 식욕 부진</label>
+                    <label class="flex items-center gap-2 p-3 border rounded-lg hover:bg-slate-100 cursor-pointer"><input type="checkbox" class="h-4 w-4"> 기력 저하</label>
+                    <label class="flex items-center gap-2 p-3 border rounded-lg hover:bg-slate-100 cursor-pointer"><input type="checkbox" class="h-4 w-4"> 기침</input></label>
+                    <label class="flex items-center gap-2 p-3 border rounded-lg hover:bg-slate-100 cursor-pointer"><input type="checkbox" class="h-4 w-4"> 피부 발진</input></label>
+                    <label class="flex items-center gap-2 p-3 border rounded-lg hover:bg-slate-100 cursor-pointer"><input type="checkbox" class="h-4 w-4"> 절뚝거림</input></label>
+                    <label class="flex items-center gap-2 p-3 border rounded-lg hover:bg-slate-100 cursor-pointer"><input type="checkbox" class="h-4 w-4"> 소변 문제</input></label>
+                </div><button class="btn-secondary w-full mt-6 py-2">분석 결과 보기</button></div>` : templates.health;
+             templates.community = templates.community.startsWith('<!--') ? `
+                <div class="mb-8 flex justify-between items-center"><h2 class="text-3xl font-bold">커뮤니티</h2><button class="btn-primary">글쓰기</button></div>
+                <div class="flex gap-8">
+                    <aside class="w-1/4 card"><h3 class="font-bold mb-4">카테고리</h3><ul class="space-y-2 text-sm"><li class="p-2 rounded bg-green-100 text-green-800 font-bold">전체 보기</li><li class="p-2 rounded hover:bg-slate-100">자유 게시판</li><li class="p-2 rounded hover:bg-slate-100">질문/답변</li><li class="p-2 rounded hover:bg-slate-100">사진/자랑</li></ul></aside>
+                    <div class="w-3/4 card"><ul class="divide-y divide-slate-200"><li class="py-4"><h3 class="font-semibold hover:underline">강아지 수제 간식 레시피 공유해요!</h3><p class="text-sm text-slate-500 mt-1">댕댕집사 · 10분 전 · 댓글 5</p></li><li class="py-4"><h3 class="font-semibold hover:underline">고양이 화장실 모래 추천받아요 ㅠㅠ</h3><p class="text-sm text-slate-500 mt-1">냥냥펀치 · 1시간 전 · 댓글 12</p></li></ul></div>
+                </div>` : templates.community;
+             templates.profile = templates.profile.startsWith('<!--') ? `
+                <div class="mb-8"><h2 class="text-3xl font-bold">프로필 관리</h2><p class="text-slate-500 mt-1">내 정보와 등록된 반려동물 정보를 관리하세요.</p></div>
+                <div class="space-y-8">
+                     <div class="card"><div class="flex justify-between items-start"><h3 class="font-bold text-lg">내 정보</h3><button class="text-sm font-bold text-slate-600 hover:underline">수정</button></div><div class="mt-4 space-y-2 text-sm"><p><span class="font-semibold w-20 inline-block">닉네임:</span> 코쪽이맘</p><p><span class="font-semibold w-20 inline-block">이메일:</span> coco_mom@example.com</p></div></div>
+                     <div class="card"><div class="flex justify-between items-start"><h3 class="font-bold text-lg">반려동물 정보</h3><button class="btn-primary text-sm">새 반려동물 추가</button></div><div class="mt-4 border border-slate-200 p-4 rounded-lg"><div class="flex justify-between items-start"><h4 class="font-semibold">코코 (강아지)</h4><button class="text-sm font-bold text-slate-600 hover:underline">관리</button></div><p class="text-sm text-slate-500">말티즈, 5살, 중성화 완료, 3.5kg</p></div></div>
+                </div>` : templates.profile;
+             templates.searchResults = templates.searchResults || ((query) => `
+                <div class="mb-8"><h2 class="text-3xl font-bold text-slate-800">'<span class="text-green-600">${query}</span>'에 대한 검색 결과</h2><p class="text-slate-500 mt-1">총 3개의 결과를 찾았습니다.</p></div>
+                <div class="card"><ul class="divide-y divide-slate-200"><li class="py-4"><a href="#" class="hover:underline"><h3 class="font-semibold">나이 많은 강아지를 위한 <span class="bg-yellow-200">사료</span> 추천</h3><p class="text-sm text-slate-500 mt-1">커뮤니티 > 정보 공유</p></a></li><li class="py-4"><a href="#" class="hover:underline"><h3 class="font-semibold">새끼 고양이 <span class="bg-yellow-200">사료</span> 급여량 질문!</h3><p class="text-sm text-slate-500 mt-1">커뮤니티 > 질문 답변</p></a></li><li class="py-4"><a href="#" class="hover:underline"><h3 class="font-semibold">반려동물 <span class="bg-yellow-200">사료</span>의 성분 알기</h3><p class="text-sm text-slate-500 mt-1">건강 정보</p></a></li></ul></div>`);
+             templates.signup = templates.signup.startsWith('<!--') ? `
+                <div class="modal-overlay" data-modal-close><div class="modal-content"><h2 class="text-2xl font-bold mb-4">회원가입</h2><form class="space-y-4"><input type="email" placeholder="이메일" class="w-full p-2 border rounded" required><input type="password" placeholder="비밀번호" class="w-full p-2 border rounded" required><input type="password" placeholder="비밀번호 확인" class="w-full p-2 border rounded" required><input type="text" placeholder="닉네임" class="w-full p-2 border rounded" required><button type="submit" class="btn-primary w-full py-2">가입하기</button></form></div></div>` : templates.signup;
+             templates.addMeal = templates.addMeal.startsWith('<!--') ? `
+                <div class="modal-overlay" data-modal-close><div class="modal-content"><h2 class="text-2xl font-bold mb-4">식사 추가</h2><form class="space-y-4"><select class="w-full p-2 border rounded"><option>코코</option></select><input type="text" placeholder="음식 이름 (예: 사료)" class="w-full p-2 border rounded"><input type="number" placeholder="칼로리 (kcal)" class="w-full p-2 border rounded"><button type="submit" class="btn-primary w-full py-2">추가하기</button></form></div></div>` : templates.addMeal;
+
+            mainContent.innerHTML = typeof templates[pageName] === 'function' ? templates[pageName](params) : templates[pageName] || '페이지를 찾을 수 없습니다.';
+            updateActiveNav(pageName);
+            window.scrollTo(0, 0);
+        }
+
+        function showModal(modalName) {
+            modalContainer.innerHTML = typeof templates[modalName] === 'function' ? templates[modalName]() : templates[modalName] || '';
+        }
+
+        function hideModal() {
+            modalContainer.innerHTML = '';
+        }
+
+        function updateActiveNav(pageName) {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.dataset.page === pageName) link.classList.add('active');
+                else link.classList.remove('active');
+            });
+        }
+        
+        const loggedOutView = document.getElementById('logged-out-view');
+        const loggedInView = document.getElementById('logged-in-view');
+        const dropdownMenu = document.getElementById('dropdown-menu');
+        
+        document.getElementById('login-button').addEventListener('click', () => {
+            loggedOutView.classList.add('hidden');
+            loggedInView.classList.remove('hidden');
+        });
+        document.getElementById('logout-button').addEventListener('click', () => {
+            loggedInView.classList.add('hidden');
+            loggedOutView.classList.remove('hidden');
+            dropdownMenu.classList.add('hidden');
+        });
+        document.getElementById('profile-button').addEventListener('click', () => {
+            dropdownMenu.classList.toggle('hidden');
+        });
+        
+        appContainer.addEventListener('click', (e) => {
+            const target = e.target.closest('[data-page], [data-modal], [data-modal-close], #apple-cal-sync-btn');
+            if (!target) return;
+            e.preventDefault();
+
+            if (target.id === 'apple-cal-sync-btn') {
+                isAppleCalendarSynced = !isAppleCalendarSynced;
+                renderPage('calendar');
+                return;
+            }
+
+            const page = target.dataset.page;
+            const modal = target.dataset.modal;
+            const modalClose = target.dataset.modalClose !== undefined;
+
+            if (page) renderPage(page);
+            if (modal) showModal(modal);
+            if (modalClose) hideModal();
+        });
+        
+        document.getElementById('search-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const query = e.target.value.trim();
+                if (query) renderPage('searchResults', query);
+            }
+        });
+        
+        document.getElementById('signup-button').addEventListener('click', (e) => {
+            e.preventDefault();
+            showModal('signup');
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
-
-            const headerTitle = document.getElementById('header-title');
-            const pages = document.querySelectorAll('.page');
-            const navItems = document.querySelectorAll('.nav-item');
-            const pageSwitchers = document.querySelectorAll('[data-page]');
-
-            const pageTitles = {
-                'main-dashboard': '하이, 몽이 보호자님!',
-                'profile-page': '프로필',
-                'pet-registration-page': '반려동물 등록',
-                'diet-log-page': '식단 관리',
-                'ingredient-analysis-page': 'AI 사료 분석',
-                'analysis-result-page': 'AI 분석 결과',
-                'walk-tracker-page': '산책',
-                'walk-history-page': '산책 기록',
-                'symptom-checker-page': '건강 체크',
-                'symptom-checklist-page': '상세 증상 체크',
-                'symptom-result-page': 'AI 분석 리포트',
-                'community-page': '커뮤니티',
-                'community-post-page': '게시글 보기',
-                'community-create-post-page': '글쓰기',
-            };
-            
-            function navigateTo(pageId) {
-                pages.forEach(p => {
-                    if (p.id === pageId) {
-                        p.classList.add('active');
-                    } else {
-                        p.classList.remove('active');
-                    }
-                });
-                
-                headerTitle.textContent = pageTitles[pageId] || 'Pet Planner';
-
-                navItems.forEach(item => {
-                    if (item.dataset.page === pageId) {
-                        item.classList.add('text-indigo-600');
-                    } else {
-                        item.classList.remove('text-indigo-600');
-                    }
-                });
-                window.scrollTo(0, 0);
-            }
-
-            pageSwitchers.forEach(switcher => {
-                switcher.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const pageId = switcher.dataset.page;
-                    navigateTo(pageId);
-                });
-            });
-            
-            // 반려동물 사진 등록
-            const petPhotoPreview = document.getElementById('pet-photo-preview');
-            const petPhotoInput = document.getElementById('pet-photo-input');
-            if(petPhotoPreview) {
-                petPhotoPreview.addEventListener('click', () => petPhotoInput.click());
-                petPhotoInput.addEventListener('change', (event) => {
-                    const file = event.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            petPhotoPreview.src = e.target.result;
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
-            }
-
-            // 반려동물 종류 선택
-            const petTypeBtns = document.querySelectorAll('.pet-type-btn');
-            petTypeBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    petTypeBtns.forEach(b => {
-                        b.classList.remove('bg-indigo-500', 'text-white');
-                    });
-                    btn.classList.add('bg-indigo-500', 'text-white');
-                });
-            });
-
-            // 초기 페이지 설정
-            navigateTo('main-dashboard');
+            renderPage('dashboard');
         });
     </script>
 </body>
 </html>
-s
